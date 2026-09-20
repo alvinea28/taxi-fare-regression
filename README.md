@@ -5,7 +5,7 @@ copied from the working taxi project at commit
 `7223bcab85b9896474258be04dce0e7b08bff6a5` on 2026-09-20.
 
 This repository is the taxi-template source for
-[alvinea28/own-ml-ops-v2](https://github.com/alvinea28/own-ml-ops-v2/tree/dev).
+[alvinea28/own-ml-ops-v2](https://github.com/alvinea28/own-ml-ops-v2/tree/main).
 The original working project was not changed. This is a clean snapshot, not a
 mirror of its Git history or a copy of its deployed Azure resources.
 
@@ -29,12 +29,12 @@ history, local virtual environments, credentials, and trained models are exclude
 
 ## Use with the accelerator
 
-Follow the [personal accelerator setup guide](https://github.com/alvinea28/own-ml-ops-v2/blob/dev/docs/TAXI-TEMPLATE.md).
+Follow the [personal accelerator setup guide](https://github.com/alvinea28/own-ml-ops-v2/blob/main/docs/TAXI-TEMPLATE.md).
 
 1. Import this repository into your Azure DevOps project as
    **taxi-fare-regression-template**, with `main` as its default branch. This
    distinct name prevents confusion with a generated application repository.
-2. Import the personal accelerator's **dev** branch and import
+2. Import the personal accelerator's **main** branch and import
    [Azure/mlops-templates](https://github.com/Azure/mlops-templates) as
    **mlops-templates**. The shared helper repository is still required.
 3. Create a **new** target Azure Repos repository (an initial README is fine).
@@ -55,7 +55,7 @@ do not automatically update an existing Azure Repos import or generated project.
   region, and your own workload-federated Azure service connection names. `demo01`
   is an example, not a deploy-ready globally unique name.
 - The `main` application branch selects production configuration; other branch
-  names select development configuration. The accelerator itself uses `dev`.
+  names select development configuration. The accelerator itself uses `main`.
 - Create/authorize the required Azure DevOps environment and service connections
   in your organization. Grant only the Azure permissions required by the pipelines.
 - Check regional Azure ML compute quota, image access, and managed-online SKU

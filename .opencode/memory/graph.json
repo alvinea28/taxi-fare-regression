@@ -1,15 +1,15 @@
 {
   "version": 1,
-  "generatedAt": "2026-09-20T06:29:14Z",
+  "generatedAt": "2026-09-20T06:59:44Z",
   "root": ".",
   "nodes": [
-    { "id": "README.md", "kind": "document", "summary": "Explains the standalone repaired taxi snapshot, Azure Repos import, tests, and remaining deployment prerequisites." },
+    { "id": "README.md", "kind": "document", "summary": "Explains the standalone taxi snapshot and setup through the personal accelerator's main branch." },
     { "id": "template-manifest.json", "kind": "configuration", "summary": "Records the source commit, supported project layout, and shared-template reference version." },
     { "id": "requirements-test.txt", "kind": "configuration", "summary": "Pins the separate Python 3.11 offline regression-test environment." },
     { "id": "config-infra-dev.yml", "kind": "configuration", "summary": "Defines generic development resource naming and workload-federated service connection settings." },
     { "id": "config-infra-prod.yml", "kind": "configuration", "summary": "Defines generic production resource naming and workload-federated service connection settings." },
     { "id": "docs/online-deployment-rerun.md", "kind": "document", "summary": "Explains model re-registration and safe online-deployment diagnostics without personal resource identifiers." },
-    { "id": "docs/daily work report/2026-09-20.md", "kind": "document", "summary": "Records the independent snapshot, regression evidence, protected-source verification, and deployment limits." },
+    { "id": "docs/daily work report/2026-09-20.md", "kind": "document", "summary": "Records snapshot verification and the follow-up setup-link update to the accelerator's main branch." },
     { "id": "tests/ml-pipeline-config.test.cjs", "kind": "test", "summary": "Checks pipeline failure guards, dependency pins, monitoring separation, and isolated CLI defaults." },
     { "id": "tests/test_inference_artifacts.py", "kind": "test", "summary": "Verifies exported MLflow artifacts and actual inference-server WSGI startup offline." },
     { "id": "tests/test_model_comparison.py", "kind": "test", "summary": "Verifies registered-model fallback and fail-closed model promotion." }
