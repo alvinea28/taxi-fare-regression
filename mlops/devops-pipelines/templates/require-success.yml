@@ -1,0 +1,20 @@
+# Shared templates may convert a failed task to SucceededWithIssues.
+# Check immediately afterward so later steps cannot run on failed prerequisites.
+parameters:
+  - name: stepName
+    type: string
+
+steps:
+  - task: Bash@3
+    displayName: Verify ${{ parameters.stepName }} succeeded
+    # succeeded() includes SucceededWithIssues, but skips a hard failure or cancellation.
+    condition: succeeded()
+    continueOnError: false
+    inputs:
+      targetType: inline
+      script: |
+        set -euo pipefail
+        if [[ "${AGENT_JOBSTATUS:-}" != "Succeeded" ]]; then
+          echo "##vso[task.logissue type=error]A required Azure ML step did not succeed (job status: ${AGENT_JOBSTATUS:-unknown}). See the preceding task log."
+          exit 1
+        fi

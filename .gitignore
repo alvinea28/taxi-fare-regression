@@ -1,0 +1,16 @@
+# Local environments, credentials, model artifacts, and test caches are not templates.
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.env
+.env.*
+!.env.example
+.azure/
+.azureml/
+.vscode/
+mlruns/
+artifacts/
+outputs/
+*.log

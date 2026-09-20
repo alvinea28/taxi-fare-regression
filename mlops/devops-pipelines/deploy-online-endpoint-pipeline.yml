@@ -1,0 +1,116 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
+name: deploy-online-endpoint-pipeline
+
+variables:
+  - ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+      # 'main' branch: PRD environment
+      - template: ../../config-infra-prod.yml
+  - ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
+      # 'develop' or feature branches: DEV environment
+      - template: ../../config-infra-dev.yml
+  - name: version
+    value: aml-cli-v2
+  - name: endpoint_name
+    value: taxi-online-$(namespace)$(postfix)$(environment)
+  - name: endpoint_type
+    value: online
+
+trigger: none
+
+pool:
+  vmImage: ubuntu-latest
+
+resources:
+  repositories:
+    - repository: mlops-templates # Template Repo
+      name: mlops-templates
+      type: git
+      ref: main
+
+stages:
+  - stage: CreateOnlineEndpoint
+    displayName: Create/Update Online Endpoint
+    jobs:
+      - job: DeployOnlineEndpoint
+        variables:
+          # Non-secret environment defaults survive AzureCLI@2's per-task config isolation.
+          AZURE_DEFAULTS_GROUP: $(resource_group)
+          AZURE_DEFAULTS_WORKSPACE: $(aml_workspace)
+        steps:
+          - checkout: self
+            path: s/
+          - task: Bash@3
+            displayName: "Create checkout repository folder(s)"
+            inputs:
+              targetType: "inline"
+              script: |
+                set -e
+                mkdir "$(Build.Repository.Name)"
+                mkdir "mlops-templates"
+          - checkout: mlops-templates
+            path: s/templates/
+          # Microsoft-hosted Ubuntu includes Azure CLI. Install only the ML extension;
+          # the shared install-az-cli template has malformed pip commands and obsolete pins.
+          - template: templates/${{ variables.version }}/install-aml-cli.yml@mlops-templates
+          - template: templates/${{ variables.version }}/connect-to-workspace.yml@mlops-templates
+          - template: templates/${{ variables.version }}/create-endpoint.yml@mlops-templates
+            parameters:
+              endpoint_file: mlops/azureml/deploy/online/online-endpoint.yml
+          - template: templates/require-success.yml
+            parameters:
+              stepName: online endpoint creation
+          - template: templates/${{ variables.version }}/create-deployment.yml@mlops-templates
+            parameters:
+              deployment_name: taxi-online-dp
+              deployment_file: mlops/azureml/deploy/online/online-deployment.yml
+          - template: templates/require-success.yml
+            parameters:
+              stepName: online deployment creation
+          - task: AzureCLI@2
+            displayName: Collect failed online deployment diagnostics
+            # The preceding guard makes continued deployment errors a hard failure.
+            condition: failed()
+            continueOnError: true
+            timeoutInMinutes: 5
+            inputs:
+              azureSubscription: $(ado_service_connection_rg)
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                set -uo pipefail
+                scope=(--resource-group "$AML_RESOURCE_GROUP" --workspace-name "$AML_WORKSPACE"
+                       --endpoint-name "$AML_ENDPOINT" --name "$AML_DEPLOYMENT")
+                echo "##[group]Resolved deployment metadata"
+                if ! az ml online-deployment show "${scope[@]}" \
+                  --query "{name:name,provisioning_state:provisioning_state,instance_type:instance_type,instance_count:instance_count,model:model,environment:environment}" \
+                  --output json --only-show-errors; then
+                  echo "##vso[task.logissue type=warning]Deployment metadata could not be retrieved; the original failure remains."
+                fi
+                echo "##[endgroup]"
+                for container in inference-server storage-initializer; do
+                  echo "##[group]${container} logs (last 1000 lines)"
+                  if ! az ml online-deployment get-logs "${scope[@]}" \
+                    --container "$container" --lines 1000 --only-show-errors; then
+                    echo "##vso[task.logissue type=warning]Could not retrieve ${container} logs. Keep the failed deployment available for diagnosis."
+                  fi
+                  echo "##[endgroup]"
+                done
+            env:
+              AML_RESOURCE_GROUP: $(resource_group)
+              AML_WORKSPACE: $(aml_workspace)
+              AML_ENDPOINT: $(endpoint_name)
+              AML_DEPLOYMENT: taxi-online-dp
+          # The shared test targets this deployment directly; traffic is not required.
+          - template: templates/${{ variables.version }}/test-deployment.yml@mlops-templates
+            parameters:
+              deployment_name: taxi-online-dp
+              sample_request: data/test-request.json
+              request_type: json
+          - template: templates/require-success.yml
+            parameters:
+              stepName: online deployment smoke test
+          - template: templates/${{ variables.version }}/allocate-traffic.yml@mlops-templates
+            parameters:
+              traffic_allocation: taxi-online-dp=100

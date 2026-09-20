@@ -1,0 +1,106 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
+name: deploy-model-training-pipeline
+
+parameters:
+  - name: skipEnvironmentRegistration
+    displayName: Skip Environment Registration
+    type: boolean
+    default: false
+  - name: skipComputeCreation
+    displayName: Skip Compute Creation
+    type: boolean
+    default: false
+  - name: skipDataRegistration
+    displayName: Skip Data Registration
+    type: boolean
+    default: false
+
+variables:
+  - ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+      # 'main' branch: PRD environment
+      - template: ../../config-infra-prod.yml
+  - ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
+      # 'develop' or feature branches: DEV environment
+      - template: ../../config-infra-dev.yml
+  - name: version
+    value: aml-cli-v2
+
+trigger: none
+
+pool:
+  vmImage: ubuntu-latest
+
+resources:
+  repositories:
+    - repository: mlops-templates # Template Repo
+      name: mlops-templates
+      type: git
+      ref: main
+
+stages:
+  - stage: DeployTrainingPipeline
+    displayName: Deploy Training Pipeline
+    jobs:
+      - job: DeployTrainingPipeline
+        timeoutInMinutes: 120 # how long to run the job before automatically cancelling
+        variables:
+          # Non-secret environment defaults survive AzureCLI@2's per-task config isolation.
+          AZURE_DEFAULTS_GROUP: $(resource_group)
+          AZURE_DEFAULTS_WORKSPACE: $(aml_workspace)
+        steps:
+          - checkout: self
+            path: s/
+          - task: Bash@3
+            displayName: "Prevent repos dir warnings"
+            inputs:
+              targetType: "inline"
+              script: |
+                set -e
+                mkdir "$(Build.Repository.Name)"
+                mkdir "mlops-templates"
+          - checkout: mlops-templates
+            path: s/templates/
+          # Microsoft-hosted Ubuntu includes Azure CLI. Install only the ML extension;
+          # the shared install-az-cli template has malformed pip commands and obsolete pins.
+          - template: templates/${{ variables.version }}/install-aml-cli.yml@mlops-templates
+          - template: templates/${{ variables.version }}/connect-to-workspace.yml@mlops-templates
+          - ${{ if ne(parameters.skipEnvironmentRegistration, true) }}:
+            - template: templates/${{ variables.version }}/register-environment.yml@mlops-templates
+              parameters:
+                environment_name: taxi-train-env
+                environment_file: mlops/azureml/train/train-env.yml
+            - template: templates/require-success.yml
+              parameters:
+                stepName: environment registration
+          - ${{ if ne(parameters.skipComputeCreation, true) }}:
+            - template: templates/${{ variables.version }}/create-compute.yml@mlops-templates
+              parameters:
+                cluster_name: cpu-cluster
+                size: Standard_D4s_v5
+                min_instances: 0
+                max_instances: 4
+                cluster_tier: low_priority
+            - template: templates/require-success.yml
+              parameters:
+                stepName: compute creation
+          - ${{ if ne(parameters.skipDataRegistration, true) }}:
+            - template: templates/${{ variables.version }}/register-data.yml@mlops-templates
+              parameters:
+                data_type: uri_file
+                data_name: taxi-data
+                data_file: mlops/azureml/train/data.yml
+            - template: templates/require-success.yml
+              parameters:
+                stepName: data registration
+          - template: templates/${{ variables.version }}/run-pipeline.yml@mlops-templates
+            parameters:
+              pipeline_file: mlops/azureml/train/pipeline.yml
+              experiment_name: $(environment)_taxi_fare_train_$(Build.SourceBranchName)
+              display_name: $(environment)_taxi_fare_run_$(Build.BuildID)
+              # This template parameter controls ADX collection, not Application Insights.
+              enable_monitoring: $(enable_training_data_monitoring)
+          - template: templates/require-success.yml
+            parameters:
+              stepName: training job

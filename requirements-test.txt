@@ -1,0 +1,16 @@
+# Python 3.11; local tests only, not the Azure ML training environment.
+# Keep serving dependencies aligned with train.py and register.py.
+setuptools==80.10.2
+azureml-ai-monitoring==1.0.0
+azureml-contrib-services==1.57.0
+azureml-inference-server-http==1.2.0
+mlflow==2.9.2
+scikit-learn==1.5.2
+numpy==1.26.4
+cloudpickle==3.1.0
+pyarrow==14.0.2
+scipy==1.14.0
+pandas==2.2.3
+matplotlib==3.9.2
+PyYAML==6.0.3
+azure-core==1.41.0

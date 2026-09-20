@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "name": "taxi-fare-regression",
+  "layout": "standalone",
+  "projectType": "classical",
+  "mlopsVersion": "aml-cli-v2",
+  "infrastructureVersion": "bicep",
+  "sourceCommit": "7223bcab85b9896474258be04dce0e7b08bff6a5",
+  "accelerator": "https://github.com/alvinea28/own-ml-ops-v2",
+  "sharedTemplates": {
+    "repository": "https://github.com/Azure/mlops-templates",
+    "azureReposName": "mlops-templates",
+    "referenceCommit": "d8883b33a5aee3dbd19d600229adb505f86bdbc0"
+  }
+}

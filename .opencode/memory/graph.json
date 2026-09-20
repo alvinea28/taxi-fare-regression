@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "generatedAt": "2026-09-20T06:29:14Z",
+  "root": ".",
+  "nodes": [
+    { "id": "README.md", "kind": "document", "summary": "Explains the standalone repaired taxi snapshot, Azure Repos import, tests, and remaining deployment prerequisites." },
+    { "id": "template-manifest.json", "kind": "configuration", "summary": "Records the source commit, supported project layout, and shared-template reference version." },
+    { "id": "requirements-test.txt", "kind": "configuration", "summary": "Pins the separate Python 3.11 offline regression-test environment." },
+    { "id": "config-infra-dev.yml", "kind": "configuration", "summary": "Defines generic development resource naming and workload-federated service connection settings." },
+    { "id": "config-infra-prod.yml", "kind": "configuration", "summary": "Defines generic production resource naming and workload-federated service connection settings." },
+    { "id": "docs/online-deployment-rerun.md", "kind": "document", "summary": "Explains model re-registration and safe online-deployment diagnostics without personal resource identifiers." },
+    { "id": "docs/daily work report/2026-09-20.md", "kind": "document", "summary": "Records the independent snapshot, regression evidence, protected-source verification, and deployment limits." },
+    { "id": "tests/ml-pipeline-config.test.cjs", "kind": "test", "summary": "Checks pipeline failure guards, dependency pins, monitoring separation, and isolated CLI defaults." },
+    { "id": "tests/test_inference_artifacts.py", "kind": "test", "summary": "Verifies exported MLflow artifacts and actual inference-server WSGI startup offline." },
+    { "id": "tests/test_model_comparison.py", "kind": "test", "summary": "Verifies registered-model fallback and fail-closed model promotion." }
+  ],
+  "edges": [
+    { "from": "README.md", "to": "template-manifest.json", "rel": "documents" },
+    { "from": "README.md", "to": "config-infra-dev.yml", "rel": "documents" },
+    { "from": "README.md", "to": "config-infra-prod.yml", "rel": "documents" },
+    { "from": "README.md", "to": "docs/online-deployment-rerun.md", "rel": "links-to" },
+    { "from": "docs/daily work report/2026-09-20.md", "to": "README.md", "rel": "reports" },
+    { "from": "requirements-test.txt", "to": "tests/test_inference_artifacts.py", "rel": "supports" },
+    { "from": "requirements-test.txt", "to": "tests/test_model_comparison.py", "rel": "supports" },
+    { "from": "tests/ml-pipeline-config.test.cjs", "to": "config-infra-dev.yml", "rel": "validates" },
+    { "from": "tests/ml-pipeline-config.test.cjs", "to": "config-infra-prod.yml", "rel": "validates" }
+  ],
+  "hotspots": ["template-manifest.json", "requirements-test.txt"]
+}
