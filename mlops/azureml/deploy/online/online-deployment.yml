@@ -2,9 +2,9 @@ $schema: https://azuremlschemas.azureedge.net/latest/managedOnlineDeployment.sch
 name: blue
 endpoint_name: taxi-fare-online
 model: azureml:taxi-model@latest
-# Verified for managed online endpoints in East US; separate from training's DSv2 quota.
-# One instance needs 4 Dasv4 quota cores including the 20% upgrade reserve.
-# Existing family limit is 6; Azure rejected the requested increase to 100.
-instance_type: Standard_D2as_v4
+# ESv3 is shared with training and batch in the same subscription and region.
+# One E2s_v3 instance requires 4 quota cores including the 20% upgrade reserve.
+# Verify live Azure ML family/total/workspace limits and regional capacity before deploying.
+instance_type: Standard_E2s_v3
 instance_count: 1
 egress_public_network_access: enabled

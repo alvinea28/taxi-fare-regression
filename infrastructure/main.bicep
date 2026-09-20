@@ -16,6 +16,15 @@ param enableMonitoring bool = true
 param enableContainerRegistry bool = true
 param enableComputeCluster bool = true
 
+@description('Training cluster SKU; keep aligned with the training and batch pipelines.')
+param computeSku string = 'Standard_E4s_v3'
+
+@minValue(0)
+param computeMinInstances int = 0
+
+@minValue(1)
+param computeMaxInstances int = 4
+
 // Key Vault settings
 param kvEnablePurgeProtection bool = false
 param kvSoftDeleteRetentionDays int = 7
@@ -112,5 +121,8 @@ module mlwcc './modules/aml_computecluster.bicep' = if (enableComputeCluster) {
   params: {
     location: location
     workspaceName: mlw.outputs.amlsName
+    computeSku: computeSku
+    minInstances: computeMinInstances
+    maxInstances: computeMaxInstances
   }
 }

@@ -58,9 +58,9 @@ stages:
           - template: templates/${{ variables.version }}/create-compute.yml@mlops-templates
             parameters:
               cluster_name: batch-cluster # name must match cluster name in deployment file below
-              size: STANDARD_D4S_V5
-              min_instances: 0
-              max_instances: 5
+              size: ${{ variables.aml_compute_sku }}
+              min_instances: ${{ variables.aml_compute_min_instances }}
+              max_instances: ${{ variables.aml_batch_max_instances }}
               cluster_tier: dedicated
           - template: templates/${{ variables.version }}/create-endpoint.yml@mlops-templates
             parameters:

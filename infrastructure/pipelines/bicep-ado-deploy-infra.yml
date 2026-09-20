@@ -54,6 +54,9 @@ stages:
                     enableMonitoring=$(enable_monitoring) \
                     enableContainerRegistry=$(enable_container_registry) \
                     enableComputeCluster=$(enable_aml_computecluster) \
+                    computeSku=$(aml_compute_sku) \
+                    computeMinInstances=$(aml_compute_min_instances) \
+                    computeMaxInstances=$(aml_compute_max_instances) \
                     tagCostCenter='$(tag_cost_center)' \
                     tagManagedBy='$(tag_managed_by)'
 
@@ -91,6 +94,9 @@ stages:
                           enableMonitoring=$(enable_monitoring) \
                           enableContainerRegistry=$(enable_container_registry) \
                           enableComputeCluster=$(enable_aml_computecluster) \
+                          computeSku=$(aml_compute_sku) \
+                          computeMinInstances=$(aml_compute_min_instances) \
+                          computeMaxInstances=$(aml_compute_max_instances) \
                           tagCostCenter='$(tag_cost_center)' \
                           tagManagedBy='$(tag_managed_by)'
 

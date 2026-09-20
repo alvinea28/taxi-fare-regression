@@ -12,6 +12,11 @@ variables:
   location: eastus
   environment: dev
   enable_aml_computecluster: true
+  # Shared ESv3 profile for infrastructure, training, and batch compute.
+  aml_compute_sku: Standard_E4s_v3
+  aml_compute_min_instances: 0
+  aml_compute_max_instances: 4
+  aml_batch_max_instances: 5
   # Required by the AML workspace template; do not disable Application Insights.
   enable_monitoring: true
   # Optional ADX training-data collection; enable only after configuring its collector.

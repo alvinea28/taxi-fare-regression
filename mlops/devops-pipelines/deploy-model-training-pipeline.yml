@@ -78,10 +78,10 @@ stages:
             - template: templates/${{ variables.version }}/create-compute.yml@mlops-templates
               parameters:
                 cluster_name: cpu-cluster
-                size: Standard_D4s_v5
-                min_instances: 0
-                max_instances: 4
-                cluster_tier: low_priority
+                size: ${{ variables.aml_compute_sku }}
+                min_instances: ${{ variables.aml_compute_min_instances }}
+                max_instances: ${{ variables.aml_compute_max_instances }}
+                cluster_tier: dedicated
             - template: templates/require-success.yml
               parameters:
                 stepName: compute creation

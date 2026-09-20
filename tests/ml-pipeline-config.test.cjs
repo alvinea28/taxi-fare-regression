@@ -181,25 +181,25 @@ test('all required training steps are immediately guarded in the same skip branc
   assert.match(guard, /continueOnError: false/);
 });
 
-test('online family migration uses verified Dasv4 quota rather than training DSv2 quota', () => {
+test('online deployment uses the ESv3 profile and includes upgrade quota reserve', () => {
   const deployment = read('mlops/azureml/deploy/online/online-deployment.yml');
   const sku = deployment.match(/^instance_type:\s*(\S+)\s*$/m)?.[1];
   const instances = Number(deployment.match(/^instance_count:\s*(\d+)\s*$/m)?.[1]);
-  assert.equal(sku, 'Standard_D2as_v4');
+  assert.equal(sku, 'Standard_E2s_v3');
   assert.equal(instances, 1, 'Additional replicas require a new live quota check.');
-  // Verified in the East US managed-online selector on 2026-09-19.
-  // This is a configuration regression, not a live quota/capacity guarantee.
+  // The user supplied an ESv3 Dedicated quota screenshot showing 96 available cores.
+  // This is a budget fixture, not an independent live quota/capacity guarantee.
   const coresPerInstance = 2;
   const requiredCores = Math.ceil(1.2 * instances) * coresPerInstance;
   const observedUsage = 0;
-  const observedLimit = 6;
+  const observedLimit = 96;
   assert.ok(
     observedUsage + requiredCores <= observedLimit,
-    `${sku} needs ${requiredCores} quota cores; observed Dasv4 availability was ${observedLimit}.`,
+    `${sku} needs ${requiredCores} quota cores; the supplied ESv3 budget was ${observedLimit}.`,
   );
   assert.equal(requiredCores, 4);
-  assert.ok(Math.ceil(1.2 * 3) * coresPerInstance > observedLimit,
-    'The portal default of three instances does not fit this quota.');
+  assert.ok(Math.ceil(1.2 * 49) * coresPerInstance > observedLimit,
+    'Large replica counts must not be assumed to fit the reported family quota.');
   assert.match(deployment, /^model: azureml:taxi-model@latest\s*$/m);
   assert.doesNotMatch(deployment, /^code_configuration:|^environment:/m);
 });
